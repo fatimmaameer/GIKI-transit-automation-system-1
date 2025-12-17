@@ -1,0 +1,119 @@
+#include <iostream>
+#include <string>
+using namespace std;
+
+/* ================= SHUTTLE STRUCT ================= */
+struct Shuttle {
+    int shuttleID;
+    int capacity;
+    int currentPassengers;
+    string status;
+    string currentStop;
+    Shuttle* next;
+
+    Shuttle(int id, int cap, string stop) {
+        shuttleID = id;
+        capacity = cap;
+        currentPassengers = 0;
+        status = "Available";  // default status
+        currentStop = stop;
+        next = NULL;
+    }
+};
+
+/* ================= SHUTTLE LINKED LIST ================= */
+class ShuttleLinkedList {
+private:
+    Shuttle* head;
+
+public:
+    ShuttleLinkedList() {
+        head = NULL;
+    }
+
+    // Add shuttle at the end
+    void addShuttle(int id, int capacity, string initialStop) {
+        Shuttle* temp = new Shuttle(id, capacity, initialStop);
+        if (head == NULL) {
+            head = temp;
+            return;
+        }
+
+        Shuttle* curr = head;
+        while (curr->next != NULL)
+            curr = curr->next;
+
+        curr->next = temp;
+    }
+
+    // Find the first available shuttle at pickup stop
+    Shuttle* findAvailableShuttle(string pickupStop) {
+        Shuttle* curr = head;
+        while (curr != NULL) {
+            if (curr->currentStop == pickupStop && curr->status == "Available" && curr->currentPassengers < curr->capacity)
+                return curr;
+            curr = curr->next;
+        }
+        return NULL;  // no shuttle available
+    }
+
+    // Update shuttle status and passengers
+    void updateShuttleStatus(int id, string status, int passengers) {
+        Shuttle* curr = head;
+        while (curr != NULL) {
+            if (curr->shuttleID == id) {
+                curr->status = status;
+                curr->currentPassengers = passengers;
+                return;
+            }
+            curr = curr->next;
+        }
+        cout << "Shuttle with ID " << id << " not found!" << endl;
+    }
+
+    // Display all shuttles
+    void displayAllShuttles() {
+        Shuttle* curr = head;
+        cout << "Shuttle List:\n";
+        while (curr != NULL) {
+            cout << "ID: " << curr->shuttleID
+                 << ", Capacity: " << curr->capacity
+                 << ", Passengers: " << curr->currentPassengers
+                 << ", Status: " << curr->status
+                 << ", Current Stop: " << curr->currentStop << endl;
+            curr = curr->next;
+        }
+    }
+
+    // Destructor to free memory
+    ~ShuttleLinkedList() {
+        Shuttle* curr = head;
+        while (curr != NULL) {
+            Shuttle* temp = curr;
+            curr = curr->next;
+            delete temp;
+        }
+    }
+};
+
+/* ================= MAIN TEST ================= */
+int main() {
+    ShuttleLinkedList shuttles;
+
+    shuttles.addShuttle(1, 10, "Library");
+    shuttles.addShuttle(2, 15, "FCSE");
+    shuttles.addShuttle(3, 12, "FBS");
+
+    shuttles.displayAllShuttles();
+
+    Shuttle* s = shuttles.findAvailableShuttle("Library");
+    if (s != NULL) {
+        cout << "\nAssigning Shuttle ID " << s->shuttleID << " at Library\n";
+        shuttles.updateShuttleStatus(s->shuttleID, "Busy", 5);
+    }
+
+    cout << "\nAfter updating status:\n";
+    shuttles.displayAllShuttles();
+
+    return 0;
+}
